@@ -2,235 +2,287 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tarik Tambang Matematika</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e0f2fe; /* Light blue background like the image */
+            background-color: #e0f2fe; /* Light blue background */
             margin: 0;
-            overflow: hidden; /* Prevent scrolling during gameplay */
-            user-select: none; /* Prevent text selection for better game feel */
+            overflow: hidden; /* Prevent scrolling */
+            /* Mencegah seleksi teks dan aksi default sentuhan (seperti zoom ganda) */
+            user-select: none; 
+            -webkit-user-select: none;
+            touch-action: manipulation; 
         }
 
         /* Mode Selection Grid */
         .mode-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
+            gap: 1.5rem; /* Gap lebih besar untuk jari */
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .mode-grid { grid-template-columns: repeat(4, 1fr); }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .mode-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 480px) {
-            .mode-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .mode-button {
             background-color: #f3f4f6;
-            border-radius: 0.75rem;
-            padding: 1rem;
+            border-radius: 1rem; /* Sudut lebih membulat */
+            padding: 1.5rem; /* Padding lebih besar */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.1s, box-shadow 0.1s;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 3px solid #e5e7eb;
+            /* Transisi dihapus untuk hover, fokus pada active */
         }
 
-        .mode-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
+        /* Efek ditekan (Active) lebih menonjol */
         .mode-button:active {
-            transform: translateY(1px);
+            transform: scale(0.95);
+            background-color: #e5e7eb;
+            border-color: #d1d5db;
         }
 
         .mode-icon {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 3.5rem; /* Ikon jauh lebih besar */
+            font-weight: 800;
             color: #4b5563;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            line-height: 1;
         }
 
         .mode-label {
-            font-size: 0.875rem;
+            font-size: 1.25rem; /* Label lebih besar dan mudah dibaca */
             color: #4b5563;
-            font-weight: 600;
+            font-weight: 700;
+            text-align: center;
         }
 
         /* Game Area CSS */
         .calculator-panel {
             background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 100%;
-            max-width: 250px; /* Keep calculators relatively small */
+            max-width: 320px; /* Panel lebih lebar */
+            border: 2px solid #e5e7eb;
         }
 
         .calc-header {
             color: white;
-            padding: 1rem;
+            padding: 1.5rem 1rem;
             text-align: center;
-            font-size: 1.25rem;
-            font-weight: bold;
+            font-size: 2rem; /* Ukuran teks soal diperbesar */
+            font-weight: 800;
         }
 
         .player1-header { background-color: #1e1b4b; } /* Dark blue */
         .player2-header { background-color: #831843; } /* Dark red */
 
         .calc-display {
-            background: white;
-            border: 1px solid #d1d5db;
-            margin: 1rem;
-            padding: 0.5rem;
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            margin: 1.5rem;
+            padding: 1rem;
             text-align: right;
-            font-size: 1.25rem;
-            border-radius: 0.25rem;
-            min-height: 2.5rem;
+            font-size: 2.5rem; /* Angka input jauh lebih besar */
+            font-weight: 700;
+            border-radius: 0.5rem;
+            min-height: 4rem; /* Tinggi minimal area input */
+            color: #1e293b;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
         }
 
         .keypad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            padding: 0 1rem 1rem 1rem;
+            gap: 1rem; /* Jarak antar tombol (gap) diperbesar */
+            padding: 0 1.5rem 1.5rem 1.5rem;
         }
 
         .key-btn {
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #374151;
+            background-color: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 1.25rem 0; /* Padding vertikal besar */
+            font-size: 2rem; /* Angka tombol lebih besar */
+            font-weight: 700;
+            color: #334155;
             cursor: pointer;
-            transition: background-color 0.1s;
+            box-shadow: 0 4px 0 #cbd5e1; /* Efek tombol 3D */
+            /* Menghapus hover, fokus pada active state */
         }
 
-        .key-btn:hover { background-color: #e5e7eb; }
-        .key-btn:active { background-color: #d1d5db; }
+        /* Efek saat tombol ditekan (seperti tombol fisik) */
+        .key-btn:active { 
+            transform: translateY(4px);
+            box-shadow: 0 0 0 transparent;
+            background-color: #e2e8f0;
+        }
         
-        .key-clear { background-color: #ef4444; color: white; border-color: #dc2626; }
-        .key-clear:hover { background-color: #dc2626; }
+        .key-clear { 
+            background-color: #ef4444; 
+            color: white; 
+            border-color: #b91c1c; 
+            box-shadow: 0 4px 0 #b91c1c; 
+        }
+        .key-clear:active { background-color: #dc2626; }
         
-        .key-go { background-color: #0284c7; color: white; border-color: #0369a1; }
-        .key-go:hover { background-color: #0369a1; }
+        .key-go { 
+            background-color: #0284c7; 
+            color: white; 
+            border-color: #0369a1; 
+            box-shadow: 0 4px 0 #0369a1; 
+        }
+        .key-go:active { background-color: #0369a1; }
 
         /* Tug of War Visuals */
         .rope-container {
             position: relative;
             width: 100%;
-            height: 150px;
+            height: 250px; /* Area lebih tinggi untuk visibilitas */
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 2rem 0;
+            margin: 3rem 0;
         }
 
         .rope {
-            width: 80%;
-            height: 10px;
-            background-color: #8B4513; /* SaddleBrown */
+            width: 85%;
+            height: 16px; /* Tali lebih tebal */
+            background-color: #8B4513; 
             position: absolute;
             z-index: 1;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .center-line {
-            width: 2px;
-            height: 100%;
+            width: 4px; /* Garis tengah lebih tebal */
+            height: 120%; /* Sedikit lebih panjang dari container */
             background-color: #9ca3af;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
             z-index: 0;
+            border-radius: 2px;
         }
 
         .marker {
-            width: 20px;
-            height: 30px;
+            width: 30px; /* Penanda (kuning) lebih besar */
+            height: 40px;
             background-color: yellow;
-            border: 2px solid black;
+            border: 3px solid black;
+            border-radius: 4px;
             position: absolute;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -5px); /* Sedikit diangkat */
             z-index: 2;
-            transition: left 0.3s ease-out; /* Smooth movement */
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efek membal (bouncy) */
         }
 
-        /* Simple CSS Characters instead of images for reliability */
         .character {
             position: absolute;
-            width: 60px;
-            height: 80px;
+            width: 100px; /* Karakter lebih besar */
+            height: 120px;
             z-index: 3;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: left 0.3s ease-out;
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Ikut membal */
         }
 
         .char-head {
-            width: 40px;
-            height: 40px;
-            background-color: #fca5a5; /* Skin color */
-            border-radius: 5px;
+            width: 60px;
+            height: 60px;
+            background-color: #ffedd5; /* Warna kulit */
+            border-radius: 8px;
             position: relative;
-            border: 2px solid #000;
+            border: 3px solid #1c1917;
         }
         
-        .char-head::before { /* Headband */
+        /* Rambut sederhana */
+        .char-head::after {
             content: '';
             position: absolute;
-            top: 5px;
-            left: -2px;
-            width: 40px;
-            height: 8px;
-            background-color: #ef4444; /* Red headband */
-            border: 1px solid #000;
+            top: -10px;
+            left: -3px;
+            width: 60px;
+            height: 20px;
+            background-color: #1c1917;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .char-head::before { /* Headband/Ikat kepala */
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: -3px;
+            width: 60px;
+            height: 12px;
+            background-color: #ef4444; 
+            border: 2px solid #1c1917;
+            z-index: 2;
         }
 
         .char-eyes {
             position: absolute;
-            top: 15px;
+            top: 35px;
             width: 100%;
             display: flex;
             justify-content: space-around;
+            padding: 0 8px;
         }
         .char-eye {
-            width: 4px; height: 4px; background-color: black; border-radius: 50%;
+            width: 8px; height: 8px; background-color: #1c1917; border-radius: 50%;
         }
 
         .char-body {
-            width: 50px;
-            height: 30px;
-            border: 2px solid #000;
-            border-radius: 5px 5px 0 0;
-            margin-top: -2px;
+            width: 80px;
+            height: 50px;
+            border: 3px solid #1c1917;
+            border-radius: 8px 8px 0 0;
+            margin-top: -3px; /* Menempel ke kepala */
+            position: relative;
+        }
+
+        /* Lengan (sederhana) */
+        .char-arm {
+            position: absolute;
+            width: 40px;
+            height: 12px;
+            background-color: #ffedd5; /* Warna kulit */
+            border: 3px solid #1c1917;
+            border-radius: 6px;
+            top: 15px;
+            z-index: 4;
         }
 
         .player1 .char-body { background-color: #1e3a8a; } /* Blue shirt */
         .player2 .char-body { background-color: #831843; } /* Red shirt */
         
-        /* Face direction */
-        .player1 .char-head { transform: scaleX(1); } /* Face right */
-        .player2 .char-head { transform: scaleX(-1); } /* Face left */
+        .player1 .char-head, .player1 .char-body { transform: scaleX(1); } /* Face right */
+        .player2 .char-head, .player2 .char-body { transform: scaleX(-1); } /* Face left */
 
-        /* Positioning */
-        #char-player1 { left: calc(10% - 30px); }
-        #char-player2 { left: calc(90% - 30px); }
+        /* Posisi Lengan mengarah ke tali */
+        .player1 .char-arm { right: -20px; transform: rotate(15deg); }
+        .player2 .char-arm { left: -20px; transform: rotate(-15deg); }
+
+        /* Positioning awal karakter */
+        #char-player1 { left: calc(15% - 50px); }
+        #char-player2 { left: calc(85% - 50px); }
 
         /* Screens */
         #selection-screen { display: flex; }
@@ -240,23 +292,33 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             align-items: center; justify-content: center;
             z-index: 50;
         }
         .modal-content {
-            background: white; padding: 2rem; border-radius: 1rem;
-            text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            background: white; 
+            padding: 4rem; /* Area dalam pop-up lebih luas */
+            border-radius: 2rem;
+            text-align: center; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 90%;
         }
 
     </style>
 </head>
 <body class="h-screen w-screen flex items-center justify-center">
 
-    <div id="selection-screen" class="w-full h-full flex flex-col items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-4xl w-full">
-            <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Tarik Tambang Matematika</h1>
-            <h2 class="text-xl text-center text-gray-600 mb-8">Pilih Mode Permainan</h2>
+    <!-- Tombol Fullscreen di Kanan Atas -->
+    <button id="fullscreen-btn" onclick="toggleFullScreen()" class="fixed top-6 right-6 z-50 bg-gray-800 text-white px-5 py-3 rounded-2xl font-bold border-4 border-gray-600 shadow-xl active:scale-95 transition-all text-lg flex items-center gap-2 opacity-70 hover:opacity-100">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        Layar Penuh
+    </button>
+
+    <div id="selection-screen" class="w-full h-full flex flex-col items-center justify-center p-8">
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-6xl w-full border-4 border-gray-100">
+            <h1 class="text-5xl font-extrabold text-center text-gray-800 mb-4">Tarik Tambang Matematika</h1>
+            <h2 class="text-3xl text-center text-gray-500 mb-10 font-semibold">Pilih Mode Permainan</h2>
             
             <div class="mode-grid" id="mode-container">
                 <!-- Buttons will be generated by JS -->
@@ -264,43 +326,43 @@
         </div>
     </div>
 
-    <div id="game-screen" class="w-full h-full flex flex-col p-4 relative">
+    <div id="game-screen" class="w-full h-full flex flex-col p-6 relative">
         
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-4">
-            <button onclick="showSelectionScreen()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+        <!-- Header Game Area (Tombol kembali lebih besar) -->
+        <div class="flex justify-between items-center mb-8 px-4">
+            <button onclick="showSelectionScreen()" class="bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-800 font-bold py-4 px-8 text-xl border-2 border-gray-300 rounded-xl shadow-sm transition-colors">
                 &larr; Kembali
             </button>
-            <h1 class="text-2xl font-bold text-gray-800" id="current-mode-title">Tarik Tambang Matematika</h1>
-            <div class="w-24"></div> <!-- Spacer for balance -->
+            <h1 class="text-4xl font-extrabold text-gray-800" id="current-mode-title">Tarik Tambang Matematika</h1>
+            <div class="w-32"></div> <!-- Spacer for balance -->
         </div>
 
-        <!-- Main Game Area -->
-        <div class="flex-grow flex flex-col md:flex-row items-center justify-center gap-8 md:gap-4 w-full max-w-6xl mx-auto">
+        <!-- Main Game Area Container -->
+        <!-- Menggunakan flex-row (mendatar) karena IFP biasanya sangat lebar -->
+        <div class="flex-grow flex flex-row items-center justify-between w-full max-w-[95%] mx-auto pb-10">
             
-            <!-- Player 1 Calculator -->
-            <div class="calculator-panel">
+            <div class="calculator-panel ml-4">
                 <div class="calc-header player1-header" id="p1-question">10 - 6 = ?</div>
                 <div class="calc-display" id="p1-input"></div>
+                <!-- Binding event touchstart/mousedown untuk respons yang instan -->
                 <div class="keypad">
-                    <button class="key-btn" onclick="inputNumber(1, 1)">1</button>
-                    <button class="key-btn" onclick="inputNumber(1, 2)">2</button>
-                    <button class="key-btn" onclick="inputNumber(1, 3)">3</button>
-                    <button class="key-btn" onclick="inputNumber(1, 4)">4</button>
-                    <button class="key-btn" onclick="inputNumber(1, 5)">5</button>
-                    <button class="key-btn" onclick="inputNumber(1, 6)">6</button>
-                    <button class="key-btn" onclick="inputNumber(1, 7)">7</button>
-                    <button class="key-btn" onclick="inputNumber(1, 8)">8</button>
-                    <button class="key-btn" onclick="inputNumber(1, 9)">9</button>
-                    <button class="key-btn key-clear" onclick="clearInput(1)">C</button>
-                    <button class="key-btn" onclick="inputNumber(1, 0)">0</button>
-                    <button class="key-btn key-go" onclick="checkAnswer(1)">Go</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 1)">1</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 2)">2</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 3)">3</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 4)">4</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 5)">5</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 6)">6</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 7)">7</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 8)">8</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 9)">9</button>
+                    <button class="key-btn key-clear" onpointerdown="clearInput(1)">C</button>
+                    <button class="key-btn" onpointerdown="inputNumber(1, 0)">0</button>
+                    <button class="key-btn key-go" onpointerdown="checkAnswer(1)">Go</button>
                 </div>
             </div>
 
-            <!-- Tug of War Visuals -->
-            <div class="flex-grow w-full md:w-auto flex flex-col items-center">
-                <div class="rope-container">
+            <div class="flex-grow flex flex-col items-center px-12">
+                <div class="rope-container w-full">
                     <div class="center-line"></div>
                     <div class="rope"></div>
                     
@@ -309,7 +371,9 @@
                         <div class="char-head">
                             <div class="char-eyes"><div class="char-eye"></div><div class="char-eye"></div></div>
                         </div>
-                        <div class="char-body"></div>
+                        <div class="char-body">
+                            <div class="char-arm"></div>
+                        </div>
                     </div>
                     
                     <!-- The Marker (Kuning) -->
@@ -320,37 +384,44 @@
                         <div class="char-head">
                             <div class="char-eyes"><div class="char-eye"></div><div class="char-eye"></div></div>
                         </div>
-                        <div class="char-body"></div>
+                        <div class="char-body">
+                            <div class="char-arm"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="text-lg font-bold text-gray-800 mt-4 text-center">
+                
+                <div class="text-3xl font-extrabold text-gray-800 mt-12 text-center bg-white px-8 py-4 rounded-full shadow-md border-2 border-gray-100">
                     Jawab soal untuk menarik tali!
                 </div>
                 
                 <!-- Score Indicator -->
-                <div class="mt-4 flex gap-4 w-full justify-between px-10 text-sm font-semibold text-gray-600">
-                    <div>Poin Biru: <span id="p1-score">0</span></div>
-                    <div>Poin Merah: <span id="p2-score">0</span></div>
+                <div class="mt-8 flex gap-8 w-full justify-center text-2xl font-bold text-gray-600">
+                    <div class="bg-blue-100 px-6 py-2 rounded-xl text-blue-900 border-2 border-blue-200">
+                        Skor Biru: <span id="p1-score" class="text-3xl">0</span>
+                    </div>
+                    <div class="bg-red-100 px-6 py-2 rounded-xl text-red-900 border-2 border-red-200">
+                        Skor Merah: <span id="p2-score" class="text-3xl">0</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Player 2 Calculator -->
-            <div class="calculator-panel">
+            <div class="calculator-panel mr-4">
                 <div class="calc-header player2-header" id="p2-question">5 &times; 6 = ?</div>
                 <div class="calc-display" id="p2-input"></div>
                 <div class="keypad">
-                    <button class="key-btn" onclick="inputNumber(2, 1)">1</button>
-                    <button class="key-btn" onclick="inputNumber(2, 2)">2</button>
-                    <button class="key-btn" onclick="inputNumber(2, 3)">3</button>
-                    <button class="key-btn" onclick="inputNumber(2, 4)">4</button>
-                    <button class="key-btn" onclick="inputNumber(2, 5)">5</button>
-                    <button class="key-btn" onclick="inputNumber(2, 6)">6</button>
-                    <button class="key-btn" onclick="inputNumber(2, 7)">7</button>
-                    <button class="key-btn" onclick="inputNumber(2, 8)">8</button>
-                    <button class="key-btn" onclick="inputNumber(2, 9)">9</button>
-                    <button class="key-btn key-clear" onclick="clearInput(2)">C</button>
-                    <button class="key-btn" onclick="inputNumber(2, 0)">0</button>
-                    <button class="key-btn key-go" onclick="checkAnswer(2)">Go</button>
+                    <!-- Menggunakan onpointerdown agar layar sentuh merespon seketika tanpa delay click -->
+                    <button class="key-btn" onpointerdown="inputNumber(2, 1)">1</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 2)">2</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 3)">3</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 4)">4</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 5)">5</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 6)">6</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 7)">7</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 8)">8</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 9)">9</button>
+                    <button class="key-btn key-clear" onpointerdown="clearInput(2)">C</button>
+                    <button class="key-btn" onpointerdown="inputNumber(2, 0)">0</button>
+                    <button class="key-btn key-go" onpointerdown="checkAnswer(2)">Go</button>
                 </div>
             </div>
 
@@ -359,13 +430,14 @@
 
     <div id="win-modal" class="modal">
         <div class="modal-content">
-            <h2 id="win-message" class="text-3xl font-bold mb-4">Tim Biru Menang!</h2>
-            <p class="text-gray-600 mb-6">Kerja bagus menyelesaikan soal matematika.</p>
-            <div class="flex justify-center gap-4">
-                <button onclick="resetGame()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            <h2 id="win-message" class="text-6xl font-extrabold mb-6">Tim Biru Menang!</h2>
+            <p class="text-3xl text-gray-600 mb-10 font-semibold">Kerja bagus menyelesaikan soal matematika!</p>
+            <div class="flex justify-center gap-8">
+                <!-- Tombol aksi besar-besar -->
+                <button onclick="resetGame()" class="bg-blue-600 active:bg-blue-700 text-white font-bold py-4 px-10 text-2xl rounded-2xl shadow-lg transform active:scale-95 transition-transform">
                     Main Lagi
                 </button>
-                <button onclick="showSelectionScreen(); document.getElementById('win-modal').style.display='none';" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                <button onclick="showSelectionScreen(); document.getElementById('win-modal').style.display='none';" class="bg-gray-500 active:bg-gray-600 text-white font-bold py-4 px-10 text-2xl rounded-2xl shadow-lg transform active:scale-95 transition-transform">
                     Ganti Mode
                 </button>
             </div>
@@ -373,101 +445,114 @@
     </div>
 
     <script>
+        // Mode disesuaikan dengan gambar kedua (15 mode)
         const modes = [
-            { id: 'add', icon: '➕', label: 'Tambah', gen: () => generateBasic(1, 20, '+') },
-            { id: 'sub', icon: '➖', label: 'Kurang', gen: () => generateSub() },
-            { id: 'mul', icon: '✖️', label: 'Kali', gen: () => generateBasic(1, 10, '*') },
-            { id: 'div', icon: '➗', label: 'Bagi', gen: () => generateDiv() },
-            { id: 'mix_basic', icon: '±', label: '+-×÷', gen: () => generateMixBasic() },
-            { id: 'pow2', icon: 'x²', label: 'Pangkat 2', gen: () => generatePow2() },
-            { id: 'pow3', icon: 'x³', label: 'Pangkat 3', gen: () => generatePow3() },
-            { id: 'sqrt', icon: '√', label: 'Akar', gen: () => generateSqrt() },
-            { id: 'cbrt', icon: '∛', label: 'Akar Pangkat 3', gen: () => generateCbrt() },
-            { id: 'mix_all', icon: '?', label: 'Campuran', gen: () => generateMixAll() },
-            { id: 'add_2d', icon: '+2', label: '2 digit +', gen: () => generateBasic(10, 99, '+') },
-            { id: 'sub_2d', icon: '-2', label: '-2 digit', gen: () => generateSub2D() },
-            { id: 'add_sub', icon: '+-', label: 'Tambah Kurang', gen: () => Math.random() > 0.5 ? generateBasic(1,50,'+') : generateSub() },
-            { id: 'mul_div', icon: '×÷', label: 'Kali Bagi', gen: () => Math.random() > 0.5 ? generateBasic(1,12,'*') : generateDiv() },
-            { id: 'percent', icon: '%', label: 'Persen', gen: () => generatePercent() }
+            { id: 'add', icon: '➕', label: 'Tambah', htmlLabel: 'Tambah', gen: () => generateBasic(1, 20, '+') },
+            { id: 'sub', icon: '➖', label: 'Kurang', htmlLabel: 'Kurang', gen: () => generateSub() },
+            { id: 'mul', icon: '✖️', label: 'Kali', htmlLabel: 'Kali', gen: () => generateBasic(1, 10, '*') },
+            { id: 'div', icon: '➗', label: 'Bagi', htmlLabel: 'Bagi', gen: () => generateDiv() },
+            { id: 'mix_basic', icon: '±', label: '+-×÷', htmlLabel: '+-×÷', gen: () => generateMixBasic() },
+            
+            { id: 'pow2', icon: 'x²', label: 'Pangkat 2', htmlLabel: 'Pangkat 2', gen: () => generatePow2() },
+            { id: 'pow3', icon: 'x³', label: 'Pangkat 3', htmlLabel: 'Pangkat 3', gen: () => generatePow3() },
+            { id: 'sqrt', icon: '√', label: 'Akar', htmlLabel: 'Akar', gen: () => generateSqrt() },
+            { id: 'cbrt', icon: '∛', label: 'Akar Pangkat 3', htmlLabel: 'Akar Pangkat 3', gen: () => generateCbrt() },
+            { id: 'mix_all', icon: '?', label: 'Campuran', htmlLabel: '+-×÷x²√', gen: () => generateMixAll() },
+            
+            { id: 'add_2d', icon: '+2', label: '2 digit +', htmlLabel: '2 digit', gen: () => generateBasic(10, 99, '+') },
+            { id: 'sub_2d', icon: '-2', label: '-2 digit', htmlLabel: '-2 digit', gen: () => generateSub2D() },
+            { id: 'add_sub', icon: '+-', label: 'Tambah Kurang', htmlLabel: 'Tambah Kurang', gen: () => Math.random() > 0.5 ? generateBasic(1,50,'+') : generateSub() },
+            { id: 'mul_div', icon: '×÷', label: 'Kali Bagi', htmlLabel: 'Kali Bagi', gen: () => Math.random() > 0.5 ? generateBasic(1,12,'*') : generateDiv() },
+            { id: 'percent', icon: '%', label: 'Persen', htmlLabel: 'Persen', gen: () => generatePercent() },
+            
+            // Mode tambahan dari gambar (Mock/Contoh karena butuh logika spesifik jika real)
+            { id: 'fpb', icon: 'FPB', label: 'FPB', htmlLabel: 'FPB', gen: () => generateMockFPB() },
+            { id: 'kpk', icon: 'KPK', label: 'KPK', htmlLabel: 'KPK', gen: () => generateMockKPK() },
+            { id: 'waktu', icon: '🕒', label: 'Waktu', htmlLabel: 'Waktu', gen: () => generateBasic(1,12,'+') }, // Placeholder
+            { id: 'jarak', icon: '📏', label: 'Jarak', htmlLabel: 'Jarak', gen: () => generateBasic(10,100,'+') }, // Placeholder
+            { id: 'buah', icon: '🍉', label: 'Hitung Buah', htmlLabel: 'Hitung Buah', gen: () => generateBasic(1,10,'+') } // Placeholder
         ];
 
         function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
         function generateBasic(min, max, op) {
-            let a = rand(min, max);
-            let b = rand(min, max);
+            let a = rand(min, max); let b = rand(min, max);
             let ans = eval(`${a} ${op} ${b}`);
-            let opStr = op === '*' ? '×' : op;
+            let opStr = op === '*' ? '×' : (op === '/' ? '÷' : op);
             return { q: `${a} ${opStr} ${b} = ?`, a: ans };
         }
 
         function generateSub() {
-            let a = rand(10, 30); let b = rand(1, a); // Ensure positive result
+            let a = rand(10, 30); let b = rand(1, a); 
             return { q: `${a} - ${b} = ?`, a: a - b };
         }
-        
         function generateSub2D() {
             let a = rand(50, 99); let b = rand(10, a);
             return { q: `${a} - ${b} = ?`, a: a - b };
         }
-
         function generateDiv() {
             let b = rand(2, 10); let ans = rand(2, 10); let a = b * ans;
             return { q: `${a} ÷ ${b} = ?`, a: ans };
         }
-
         function generateMixBasic() {
-            const ops = [
-                () => generateBasic(1, 20, '+'),
-                () => generateSub(),
-                () => generateBasic(1, 10, '*'),
-                () => generateDiv()
-            ];
+            const ops = [ () => generateBasic(1, 20, '+'), () => generateSub(), () => generateBasic(1, 10, '*'), () => generateDiv() ];
             return ops[rand(0, 3)]();
         }
-
         function generatePow2() {
             let a = rand(2, 15); return { q: `${a}² = ?`, a: a * a };
         }
-
         function generatePow3() {
             let a = rand(2, 6); return { q: `${a}³ = ?`, a: a * a * a };
         }
-
         function generateSqrt() {
             let ans = rand(2, 12); return { q: `√${ans * ans} = ?`, a: ans };
         }
-
         function generateCbrt() {
             let ans = rand(2, 6); return { q: `∛${ans * ans * ans} = ?`, a: ans };
         }
-
         function generatePercent() {
-            let percent = rand(1, 9) * 10; // 10%, 20% ... 90%
-            let val = rand(1, 10) * 100; // 100, 200 ... 1000
+            let percent = rand(1, 9) * 10; let val = rand(1, 10) * 100;
             return { q: `${percent}% dari ${val} = ?`, a: (percent / 100) * val };
         }
-
         function generateMixAll() {
-            const allGens = [generateMixBasic, generatePow2, generateSqrt];
-            return allGens[rand(0, 2)]();
+            const allGens = [generateMixBasic, generatePow2, generateSqrt, generateCbrt];
+            return allGens[rand(0, 3)]();
+        }
+        
+        // Mock generators untuk icon khusus
+        function generateMockFPB() {
+            let num = rand(1,5) * 2; return { q: `FPB(${num*2}, ${num*3}) = ?`, a: num };
+        }
+        function generateMockKPK() {
+             return { q: `KPK(4, 6) = ?`, a: 12 };
         }
 
         let currentMode = null;
         let p1State = { input: "", answer: 0, score: 0 };
         let p2State = { input: "", answer: 0, score: 0 };
-        let tugPosition = 50; // 0 (P1 win) to 100 (P2 win). Start at 50.
-        const winThreshold = 10; // How much difference to win
+        let tugPosition = 50; // Posisi tali (50 = tengah)
+        const winThreshold = 10; // Jarak posisi untuk menang (posisi 10 atau 90)
         
-        // Populate Mode Selection
+        // Populate Mode Selection (Disesuaikan agar mirip gambar)
         const modeContainer = document.getElementById('mode-container');
-        modes.forEach(mode => {
+        // Hanya ambil 15 mode pertama (3 baris x 5 kolom) sesuai gambar
+        modes.slice(0, 15).forEach(mode => {
             const btn = document.createElement('div');
             btn.className = 'mode-button';
-            btn.innerHTML = `<div class="mode-icon">${mode.icon}</div><div class="mode-label">${mode.label}</div>`;
-            btn.onclick = () => startGame(mode);
+            // Menambahkan onpointerdown untuk respon lebih cepat di IFP dibanding onclick
+            btn.onpointerdown = () => startGame(mode);
+            
+            // Format HTML khusus untuk mengakomodasi teks seperti x²
+            let iconHtml = mode.icon;
+            if(mode.id === 'pow2') iconHtml = 'x<sup>2</sup>';
+            if(mode.id === 'pow3') iconHtml = 'x<sup>3</sup>';
+            
+            btn.innerHTML = `<div class="mode-icon">${iconHtml}</div><div class="mode-label">${mode.htmlLabel}</div>`;
             modeContainer.appendChild(btn);
         });
+
+        // Mencegah klik kanan/konteks menu di layar sentuh (biasanya mengganggu)
+        document.addEventListener('contextmenu', event => event.preventDefault());
 
         function showSelectionScreen() {
             document.getElementById('selection-screen').style.display = 'flex';
@@ -475,8 +560,11 @@
         }
 
         function startGame(mode) {
+            // Memicu Full Screen saat pengguna memilih mode permainan
+            enterFullScreen();
+
             currentMode = mode;
-            document.getElementById('current-mode-title').innerText = `Mode: ${mode.label}`;
+            document.getElementById('current-mode-title').innerText = mode.label;
             
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'flex';
@@ -488,11 +576,11 @@
             if (!currentMode) return;
             let qData = currentMode.gen();
             if (playerNum === 1) {
-                document.getElementById('p1-question').innerText = qData.q;
+                document.getElementById('p1-question').innerHTML = qData.q;
                 p1State.answer = qData.a;
                 clearInput(1);
             } else {
-                document.getElementById('p2-question').innerText = qData.q;
+                document.getElementById('p2-question').innerHTML = qData.q;
                 p2State.answer = qData.a;
                 clearInput(2);
             }
@@ -500,7 +588,7 @@
 
         function inputNumber(playerNum, num) {
             let pState = playerNum === 1 ? p1State : p2State;
-            // Prevent too long inputs
+            // Membatasi panjang input
             if (pState.input.length < 5) {
                 pState.input += num.toString();
                 updateDisplay(playerNum);
@@ -525,33 +613,33 @@
             let userAnswer = parseInt(pState.input, 10);
             
             if (userAnswer === pState.answer) {
-                // Correct!
+                // Jawaban Benar
                 pState.score++;
                 document.getElementById(`p${playerNum}-score`).innerText = pState.score;
                 
-                // Move rope
+                // Pindahkan tali sebesar 5%
                 if (playerNum === 1) {
-                    tugPosition -= 5; // Move left
+                    tugPosition -= 5; // Geser ke kiri (Pemain 1)
                 } else {
-                    tugPosition += 5; // Move right
+                    tugPosition += 5; // Geser ke kanan (Pemain 2)
                 }
                 
                 updateRopeVisuals();
                 getNewQuestion(playerNum);
                 checkWinCondition();
             } else {
-                // Wrong! Just clear input to let them try again quickly
+                // Jawaban Salah
                 clearInput(playerNum);
                 
-                // Visual feedback for wrong answer
+                // Feedback visual sesaat warna merah
                 let display = document.getElementById(`p${playerNum}-input`);
                 display.style.backgroundColor = '#fca5a5';
-                setTimeout(() => { display.style.backgroundColor = 'white'; }, 200);
+                setTimeout(() => { display.style.backgroundColor = '#f8fafc'; }, 300);
             }
         }
 
         function updateRopeVisuals() {
-            // Constrain position just in case
+            // Batasi pergerakan posisi minimal 10% dan maksimal 90%
             if(tugPosition < 10) tugPosition = 10;
             if(tugPosition > 90) tugPosition = 90;
 
@@ -559,23 +647,24 @@
             const p1Char = document.getElementById('char-player1');
             const p2Char = document.getElementById('char-player2');
 
-            // Update marker
+            // Perbarui posisi penanda kuning tengah
             marker.style.left = `${tugPosition}%`;
             
-            // Move characters along with the rope (relative to their start positions)
-            // Start positions were roughly 10% and 90%
-            let offset = tugPosition - 50; // -40 to +40
+            // Hitung offset dari posisi tengah (50)
+            let offset = tugPosition - 50; 
             
-            // Adjust character positions based on offset
-            p1Char.style.left = `calc(10% - 30px + ${offset * 0.8}%)`;
-            p2Char.style.left = `calc(90% - 30px + ${offset * 0.8}%)`;
+            // Gerakkan karakter mengikuti tali, tapi dengan rasio sedikit berbeda 
+            // (menggunakan 0.85 agar karakter tidak keluar batas area tali)
+            p1Char.style.left = `calc(15% - 50px + ${offset * 0.85}%)`;
+            p2Char.style.left = `calc(85% - 50px + ${offset * 0.85}%)`;
         }
 
         function checkWinCondition() {
+            // Menang jika posisi tali mencapai batas ekstrim
             if (tugPosition <= 20) {
-                endGame("Tim Biru (Kiri) Menang!", "bg-blue-100", "text-blue-800");
+                endGame("Tim Biru (Kiri) Menang!", "bg-blue-100", "text-blue-900");
             } else if (tugPosition >= 80) {
-                endGame("Tim Merah (Kanan) Menang!", "bg-red-100", "text-red-800");
+                endGame("Tim Merah (Kanan) Menang!", "bg-red-100", "text-red-900");
             }
         }
 
@@ -584,8 +673,10 @@
             const msgEl = document.getElementById('win-message');
             
             msgEl.innerText = message;
-            msgEl.className = `text-3xl font-bold mb-4 ${textClass}`;
-            document.querySelector('.modal-content').className = `modal-content ${bgClass}`;
+            msgEl.className = `text-6xl font-extrabold mb-6 ${textClass}`; // Warna teks disesuaikan tim
+            
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.className = `modal-content border-8 ${bgClass === 'bg-blue-100' ? 'border-blue-300' : 'border-red-300'} ${bgClass}`;
             
             modal.style.display = 'flex';
         }
@@ -593,7 +684,7 @@
         function resetGame() {
             p1State = { input: "", answer: 0, score: 0 };
             p2State = { input: "", answer: 0, score: 0 };
-            tugPosition = 50;
+            tugPosition = 50; // Kembalikan ke tengah
             
             document.getElementById('p1-score').innerText = "0";
             document.getElementById('p2-score').innerText = "0";
@@ -605,12 +696,63 @@
             document.getElementById('win-modal').style.display = 'none';
         }
 
-        // Keyboard support for testing (Player 1 uses keys, Player 2 uses Numpad)
+        // --- FITUR FULLSCREEN ---
+        function enterFullScreen() {
+            const elem = document.documentElement; // Ambil seluruh elemen HTML
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log("Gagal memicu layar penuh:", err));
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function exitFullScreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                enterFullScreen();
+            } else {
+                exitFullScreen();
+            }
+        }
+
+        // Listener untuk mengubah teks/warna tombol fullscreen otomatis
+        document.addEventListener('fullscreenchange', updateFsButton);
+        document.addEventListener('webkitfullscreenchange', updateFsButton);
+        document.addEventListener('MSFullscreenChange', updateFsButton);
+
+        function updateFsButton() {
+            const btn = document.getElementById('fullscreen-btn');
+            // Cek apakah saat ini sedang dalam mode layar penuh
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg> Keluar Penuh`;
+                // Ubah warna menjadi merah saat full screen untuk indikasi keluar
+                btn.classList.remove('bg-gray-800', 'border-gray-600');
+                btn.classList.add('bg-red-600', 'border-red-800');
+            } else {
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg> Layar Penuh`;
+                // Ubah kembali warna asli
+                btn.classList.remove('bg-red-600', 'border-red-800');
+                btn.classList.add('bg-gray-800', 'border-gray-600');
+            }
+        }
+
+        // Fitur Keyboard tetap dipertahankan untuk testing di PC
         document.addEventListener('keydown', (e) => {
             if(document.getElementById('game-screen').style.display !== 'flex') return;
             if(document.getElementById('win-modal').style.display === 'flex') return;
 
-            // Player 1 (Main Keyboard numbers & Enter)
+            // Player 1 (Tombol Angka Atas & Enter)
             if (e.key >= '0' && e.key <= '9' && e.code.startsWith('Digit')) {
                 inputNumber(1, parseInt(e.key));
             } else if (e.code === 'Enter') {
@@ -619,7 +761,7 @@
                 clearInput(1);
             }
 
-            // Player 2 (Numpad numbers) - Useful if testing locally with full keyboard
+            // Player 2 (Numpad)
             if (e.key >= '0' && e.key <= '9' && e.code.startsWith('Numpad')) {
                 inputNumber(2, parseInt(e.key));
             } else if (e.code === 'NumpadEnter') {
