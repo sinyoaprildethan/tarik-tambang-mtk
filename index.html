@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarik Tambang Matematika</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e0f2fe; /* Light blue background like the image */
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling during gameplay */
+            user-select: none; /* Prevent text selection for better game feel */
+        }
+
+        /* Mode Selection Grid */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .mode-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .mode-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .mode-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .mode-button {
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.1s, box-shadow 0.1s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .mode-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .mode-button:active {
+            transform: translateY(1px);
+        }
+
+        .mode-icon {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-label {
+            font-size: 0.875rem;
+            color: #4b5563;
+            font-weight: 600;
+        }
+
+        /* Game Area CSS */
+        .calculator-panel {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 250px; /* Keep calculators relatively small */
+        }
+
+        .calc-header {
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .player1-header { background-color: #1e1b4b; } /* Dark blue */
+        .player2-header { background-color: #831843; } /* Dark red */
+
+        .calc-display {
+            background: white;
+            border: 1px solid #d1d5db;
+            margin: 1rem;
+            padding: 0.5rem;
+            text-align: right;
+            font-size: 1.25rem;
+            border-radius: 0.25rem;
+            min-height: 2.5rem;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            padding: 0 1rem 1rem 1rem;
+        }
+
+        .key-btn {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        .key-btn:hover { background-color: #e5e7eb; }
+        .key-btn:active { background-color: #d1d5db; }
+        
+        .key-clear { background-color: #ef4444; color: white; border-color: #dc2626; }
+        .key-clear:hover { background-color: #dc2626; }
+        
+        .key-go { background-color: #0284c7; color: white; border-color: #0369a1; }
+        .key-go:hover { background-color: #0369a1; }
+
+        /* Tug of War Visuals */
+        .rope-container {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .rope {
+            width: 80%;
+            height: 10px;
+            background-color: #8B4513; /* SaddleBrown */
+            position: absolute;
+            z-index: 1;
+        }
+
+        .center-line {
+            width: 2px;
+            height: 100%;
+            background-color: #9ca3af;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .marker {
+            width: 20px;
+            height: 30px;
+            background-color: yellow;
+            border: 2px solid black;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            transition: left 0.3s ease-out; /* Smooth movement */
+        }
+
+        /* Simple CSS Characters instead of images for reliability */
+        .character {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: left 0.3s ease-out;
+        }
+
+        .char-head {
+            width: 40px;
+            height: 40px;
+            background-color: #fca5a5; /* Skin color */
+            border-radius: 5px;
+            position: relative;
+            border: 2px solid #000;
+        }
+        
+        .char-head::before { /* Headband */
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: -2px;
+            width: 40px;
+            height: 8px;
+            background-color: #ef4444; /* Red headband */
+            border: 1px solid #000;
+        }
+
+        .char-eyes {
+            position: absolute;
+            top: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+        .char-eye {
+            width: 4px; height: 4px; background-color: black; border-radius: 50%;
+        }
+
+        .char-body {
+            width: 50px;
+            height: 30px;
+            border: 2px solid #000;
+            border-radius: 5px 5px 0 0;
+            margin-top: -2px;
+        }
+
+        .player1 .char-body { background-color: #1e3a8a; } /* Blue shirt */
+        .player2 .char-body { background-color: #831843; } /* Red shirt */
+        
+        /* Face direction */
+        .player1 .char-head { transform: scaleX(1); } /* Face right */
+        .player2 .char-head { transform: scaleX(-1); } /* Face left */
+
+        /* Positioning */
+        #char-player1 { left: calc(10% - 30px); }
+        #char-player2 { left: calc(90% - 30px); }
+
+        /* Screens */
+        #selection-screen { display: flex; }
+        #game-screen { display: none; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 1rem;
+            text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center">
+
+    <div id="selection-screen" class="w-full h-full flex flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-4xl w-full">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Tarik Tambang Matematika</h1>
+            <h2 class="text-xl text-center text-gray-600 mb-8">Pilih Mode Permainan</h2>
+            
+            <div class="mode-grid" id="mode-container">
+                <!-- Buttons will be generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="w-full h-full flex flex-col p-4 relative">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="showSelectionScreen()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+                &larr; Kembali
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800" id="current-mode-title">Tarik Tambang Matematika</h1>
+            <div class="w-24"></div> <!-- Spacer for balance -->
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="flex-grow flex flex-col md:flex-row items-center justify-center gap-8 md:gap-4 w-full max-w-6xl mx-auto">
+            
+            <!-- Player 1 Calculator -->
+            <div class="calculator-panel">
+                <div class="calc-header player1-header" id="p1-question">10 - 6 = ?</div>
+                <div class="calc-display" id="p1-input"></div>
+                <div class="keypad">
+                    <button class="key-btn" onclick="inputNumber(1, 1)">1</button>
+                    <button class="key-btn" onclick="inputNumber(1, 2)">2</button>
+                    <button class="key-btn" onclick="inputNumber(1, 3)">3</button>
+                    <button class="key-btn" onclick="inputNumber(1, 4)">4</button>
+                    <button class="key-btn" onclick="inputNumber(1, 5)">5</button>
+                    <button class="key-btn" onclick="inputNumber(1, 6)">6</button>
+                    <button class="key-btn" onclick="inputNumber(1, 7)">7</button>
+                    <button class="key-btn" onclick="inputNumber(1, 8)">8</button>
+                    <button class="key-btn" onclick="inputNumber(1, 9)">9</button>
+                    <button class="key-btn key-clear" onclick="clearInput(1)">C</button>
+                    <button class="key-btn" onclick="inputNumber(1, 0)">0</button>
+                    <button class="key-btn key-go" onclick="checkAnswer(1)">Go</button>
+                </div>
+            </div>
+
+            <!-- Tug of War Visuals -->
+            <div class="flex-grow w-full md:w-auto flex flex-col items-center">
+                <div class="rope-container">
+                    <div class="center-line"></div>
+                    <div class="rope"></div>
+                    
+                    <!-- Player 1 Character -->
+                    <div class="character player1" id="char-player1">
+                        <div class="char-head">
+                            <div class="char-eyes"><div class="char-eye"></div><div class="char-eye"></div></div>
+                        </div>
+                        <div class="char-body"></div>
+                    </div>
+                    
+                    <!-- The Marker (Kuning) -->
+                    <div class="marker" id="rope-marker" style="left: 50%;"></div>
+                    
+                    <!-- Player 2 Character -->
+                    <div class="character player2" id="char-player2">
+                        <div class="char-head">
+                            <div class="char-eyes"><div class="char-eye"></div><div class="char-eye"></div></div>
+                        </div>
+                        <div class="char-body"></div>
+                    </div>
+                </div>
+                <div class="text-lg font-bold text-gray-800 mt-4 text-center">
+                    Jawab soal untuk menarik tali!
+                </div>
+                
+                <!-- Score Indicator -->
+                <div class="mt-4 flex gap-4 w-full justify-between px-10 text-sm font-semibold text-gray-600">
+                    <div>Poin Biru: <span id="p1-score">0</span></div>
+                    <div>Poin Merah: <span id="p2-score">0</span></div>
+                </div>
+            </div>
+
+            <!-- Player 2 Calculator -->
+            <div class="calculator-panel">
+                <div class="calc-header player2-header" id="p2-question">5 &times; 6 = ?</div>
+                <div class="calc-display" id="p2-input"></div>
+                <div class="keypad">
+                    <button class="key-btn" onclick="inputNumber(2, 1)">1</button>
+                    <button class="key-btn" onclick="inputNumber(2, 2)">2</button>
+                    <button class="key-btn" onclick="inputNumber(2, 3)">3</button>
+                    <button class="key-btn" onclick="inputNumber(2, 4)">4</button>
+                    <button class="key-btn" onclick="inputNumber(2, 5)">5</button>
+                    <button class="key-btn" onclick="inputNumber(2, 6)">6</button>
+                    <button class="key-btn" onclick="inputNumber(2, 7)">7</button>
+                    <button class="key-btn" onclick="inputNumber(2, 8)">8</button>
+                    <button class="key-btn" onclick="inputNumber(2, 9)">9</button>
+                    <button class="key-btn key-clear" onclick="clearInput(2)">C</button>
+                    <button class="key-btn" onclick="inputNumber(2, 0)">0</button>
+                    <button class="key-btn key-go" onclick="checkAnswer(2)">Go</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="win-message" class="text-3xl font-bold mb-4">Tim Biru Menang!</h2>
+            <p class="text-gray-600 mb-6">Kerja bagus menyelesaikan soal matematika.</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="resetGame()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    Main Lagi
+                </button>
+                <button onclick="showSelectionScreen(); document.getElementById('win-modal').style.display='none';" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                    Ganti Mode
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modes = [
+            { id: 'add', icon: '➕', label: 'Tambah', gen: () => generateBasic(1, 20, '+') },
+            { id: 'sub', icon: '➖', label: 'Kurang', gen: () => generateSub() },
+            { id: 'mul', icon: '✖️', label: 'Kali', gen: () => generateBasic(1, 10, '*') },
+            { id: 'div', icon: '➗', label: 'Bagi', gen: () => generateDiv() },
+            { id: 'mix_basic', icon: '±', label: '+-×÷', gen: () => generateMixBasic() },
+            { id: 'pow2', icon: 'x²', label: 'Pangkat 2', gen: () => generatePow2() },
+            { id: 'pow3', icon: 'x³', label: 'Pangkat 3', gen: () => generatePow3() },
+            { id: 'sqrt', icon: '√', label: 'Akar', gen: () => generateSqrt() },
+            { id: 'cbrt', icon: '∛', label: 'Akar Pangkat 3', gen: () => generateCbrt() },
+            { id: 'mix_all', icon: '?', label: 'Campuran', gen: () => generateMixAll() },
+            { id: 'add_2d', icon: '+2', label: '2 digit +', gen: () => generateBasic(10, 99, '+') },
+            { id: 'sub_2d', icon: '-2', label: '-2 digit', gen: () => generateSub2D() },
+            { id: 'add_sub', icon: '+-', label: 'Tambah Kurang', gen: () => Math.random() > 0.5 ? generateBasic(1,50,'+') : generateSub() },
+            { id: 'mul_div', icon: '×÷', label: 'Kali Bagi', gen: () => Math.random() > 0.5 ? generateBasic(1,12,'*') : generateDiv() },
+            { id: 'percent', icon: '%', label: 'Persen', gen: () => generatePercent() }
+        ];
+
+        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function generateBasic(min, max, op) {
+            let a = rand(min, max);
+            let b = rand(min, max);
+            let ans = eval(`${a} ${op} ${b}`);
+            let opStr = op === '*' ? '×' : op;
+            return { q: `${a} ${opStr} ${b} = ?`, a: ans };
+        }
+
+        function generateSub() {
+            let a = rand(10, 30); let b = rand(1, a); // Ensure positive result
+            return { q: `${a} - ${b} = ?`, a: a - b };
+        }
+        
+        function generateSub2D() {
+            let a = rand(50, 99); let b = rand(10, a);
+            return { q: `${a} - ${b} = ?`, a: a - b };
+        }
+
+        function generateDiv() {
+            let b = rand(2, 10); let ans = rand(2, 10); let a = b * ans;
+            return { q: `${a} ÷ ${b} = ?`, a: ans };
+        }
+
+        function generateMixBasic() {
+            const ops = [
+                () => generateBasic(1, 20, '+'),
+                () => generateSub(),
+                () => generateBasic(1, 10, '*'),
+                () => generateDiv()
+            ];
+            return ops[rand(0, 3)]();
+        }
+
+        function generatePow2() {
+            let a = rand(2, 15); return { q: `${a}² = ?`, a: a * a };
+        }
+
+        function generatePow3() {
+            let a = rand(2, 6); return { q: `${a}³ = ?`, a: a * a * a };
+        }
+
+        function generateSqrt() {
+            let ans = rand(2, 12); return { q: `√${ans * ans} = ?`, a: ans };
+        }
+
+        function generateCbrt() {
+            let ans = rand(2, 6); return { q: `∛${ans * ans * ans} = ?`, a: ans };
+        }
+
+        function generatePercent() {
+            let percent = rand(1, 9) * 10; // 10%, 20% ... 90%
+            let val = rand(1, 10) * 100; // 100, 200 ... 1000
+            return { q: `${percent}% dari ${val} = ?`, a: (percent / 100) * val };
+        }
+
+        function generateMixAll() {
+            const allGens = [generateMixBasic, generatePow2, generateSqrt];
+            return allGens[rand(0, 2)]();
+        }
+
+        let currentMode = null;
+        let p1State = { input: "", answer: 0, score: 0 };
+        let p2State = { input: "", answer: 0, score: 0 };
+        let tugPosition = 50; // 0 (P1 win) to 100 (P2 win). Start at 50.
+        const winThreshold = 10; // How much difference to win
+        
+        // Populate Mode Selection
+        const modeContainer = document.getElementById('mode-container');
+        modes.forEach(mode => {
+            const btn = document.createElement('div');
+            btn.className = 'mode-button';
+            btn.innerHTML = `<div class="mode-icon">${mode.icon}</div><div class="mode-label">${mode.label}</div>`;
+            btn.onclick = () => startGame(mode);
+            modeContainer.appendChild(btn);
+        });
+
+        function showSelectionScreen() {
+            document.getElementById('selection-screen').style.display = 'flex';
+            document.getElementById('game-screen').style.display = 'none';
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            document.getElementById('current-mode-title').innerText = `Mode: ${mode.label}`;
+            
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            resetGame();
+        }
+
+        function getNewQuestion(playerNum) {
+            if (!currentMode) return;
+            let qData = currentMode.gen();
+            if (playerNum === 1) {
+                document.getElementById('p1-question').innerText = qData.q;
+                p1State.answer = qData.a;
+                clearInput(1);
+            } else {
+                document.getElementById('p2-question').innerText = qData.q;
+                p2State.answer = qData.a;
+                clearInput(2);
+            }
+        }
+
+        function inputNumber(playerNum, num) {
+            let pState = playerNum === 1 ? p1State : p2State;
+            // Prevent too long inputs
+            if (pState.input.length < 5) {
+                pState.input += num.toString();
+                updateDisplay(playerNum);
+            }
+        }
+
+        function clearInput(playerNum) {
+            let pState = playerNum === 1 ? p1State : p2State;
+            pState.input = "";
+            updateDisplay(playerNum);
+        }
+
+        function updateDisplay(playerNum) {
+            let inputStr = playerNum === 1 ? p1State.input : p2State.input;
+            document.getElementById(`p${playerNum}-input`).innerText = inputStr;
+        }
+
+        function checkAnswer(playerNum) {
+            let pState = playerNum === 1 ? p1State : p2State;
+            if (pState.input === "") return;
+
+            let userAnswer = parseInt(pState.input, 10);
+            
+            if (userAnswer === pState.answer) {
+                // Correct!
+                pState.score++;
+                document.getElementById(`p${playerNum}-score`).innerText = pState.score;
+                
+                // Move rope
+                if (playerNum === 1) {
+                    tugPosition -= 5; // Move left
+                } else {
+                    tugPosition += 5; // Move right
+                }
+                
+                updateRopeVisuals();
+                getNewQuestion(playerNum);
+                checkWinCondition();
+            } else {
+                // Wrong! Just clear input to let them try again quickly
+                clearInput(playerNum);
+                
+                // Visual feedback for wrong answer
+                let display = document.getElementById(`p${playerNum}-input`);
+                display.style.backgroundColor = '#fca5a5';
+                setTimeout(() => { display.style.backgroundColor = 'white'; }, 200);
+            }
+        }
+
+        function updateRopeVisuals() {
+            // Constrain position just in case
+            if(tugPosition < 10) tugPosition = 10;
+            if(tugPosition > 90) tugPosition = 90;
+
+            const marker = document.getElementById('rope-marker');
+            const p1Char = document.getElementById('char-player1');
+            const p2Char = document.getElementById('char-player2');
+
+            // Update marker
+            marker.style.left = `${tugPosition}%`;
+            
+            // Move characters along with the rope (relative to their start positions)
+            // Start positions were roughly 10% and 90%
+            let offset = tugPosition - 50; // -40 to +40
+            
+            // Adjust character positions based on offset
+            p1Char.style.left = `calc(10% - 30px + ${offset * 0.8}%)`;
+            p2Char.style.left = `calc(90% - 30px + ${offset * 0.8}%)`;
+        }
+
+        function checkWinCondition() {
+            if (tugPosition <= 20) {
+                endGame("Tim Biru (Kiri) Menang!", "bg-blue-100", "text-blue-800");
+            } else if (tugPosition >= 80) {
+                endGame("Tim Merah (Kanan) Menang!", "bg-red-100", "text-red-800");
+            }
+        }
+
+        function endGame(message, bgClass, textClass) {
+            const modal = document.getElementById('win-modal');
+            const msgEl = document.getElementById('win-message');
+            
+            msgEl.innerText = message;
+            msgEl.className = `text-3xl font-bold mb-4 ${textClass}`;
+            document.querySelector('.modal-content').className = `modal-content ${bgClass}`;
+            
+            modal.style.display = 'flex';
+        }
+
+        function resetGame() {
+            p1State = { input: "", answer: 0, score: 0 };
+            p2State = { input: "", answer: 0, score: 0 };
+            tugPosition = 50;
+            
+            document.getElementById('p1-score').innerText = "0";
+            document.getElementById('p2-score').innerText = "0";
+            
+            updateRopeVisuals();
+            getNewQuestion(1);
+            getNewQuestion(2);
+            
+            document.getElementById('win-modal').style.display = 'none';
+        }
+
+        // Keyboard support for testing (Player 1 uses keys, Player 2 uses Numpad)
+        document.addEventListener('keydown', (e) => {
+            if(document.getElementById('game-screen').style.display !== 'flex') return;
+            if(document.getElementById('win-modal').style.display === 'flex') return;
+
+            // Player 1 (Main Keyboard numbers & Enter)
+            if (e.key >= '0' && e.key <= '9' && e.code.startsWith('Digit')) {
+                inputNumber(1, parseInt(e.key));
+            } else if (e.code === 'Enter') {
+                checkAnswer(1);
+            } else if (e.code === 'Backspace' || e.code === 'KeyC') {
+                clearInput(1);
+            }
+
+            // Player 2 (Numpad numbers) - Useful if testing locally with full keyboard
+            if (e.key >= '0' && e.key <= '9' && e.code.startsWith('Numpad')) {
+                inputNumber(2, parseInt(e.key));
+            } else if (e.code === 'NumpadEnter') {
+                checkAnswer(2);
+            } else if (e.code === 'Delete' || e.code === 'NumpadDecimal') {
+                clearInput(2);
+            }
+        });
+
+    </script>
+</body>
+</html>
